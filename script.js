@@ -210,15 +210,27 @@ function downloadPDF() {
   var filename = "SSI_Calculation_" + memberName.replace(/\s+/g, "_") + ".pdf";
 
   var opt = {
-    margin: 0.5,
+    margin: [0.3, 0.3, 0.3, 0.3], // top, left, bottom, right
     filename: filename,
     image: { type: 'jpeg', quality: 0.98 },
-    html2canvas: { scale: 2 },
-    jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+    html2canvas: { 
+      scale: 2,
+      useCORS: true,
+      letterRendering: true,
+      scrollY: 0
+    },
+    jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' },
+    pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
   };
 
+  // Temporarily reduce padding for PDF generation
+  element.style.padding = "0.1in";
+  
   // New Promise-based usage:
-  html2pdf().set(opt).from(element).save();
+  html2pdf().set(opt).from(element).save().then(function() {
+    // Restore padding after generation
+    element.style.padding = "";
+  });
 }
 
 function autoFillColaBase() {

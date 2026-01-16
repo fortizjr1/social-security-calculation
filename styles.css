@@ -188,23 +188,39 @@ min-width: 180px;
 }
 
 @media print {
-.no-print {
-display: none;
-}
-.page {
-box-shadow: none;
-border: none;
-max-width: none;
-padding: 0;
-}
-body {
-background: white;
-padding: 0;
-}
-.card {
-break-inside: avoid;
-border: 1px solid #ccc;
-}
+  .no-print, .no-pdf {
+    display: none !important;
+  }
+  body {
+    background: white !important;
+    padding: 0 !important;
+  }
+  .page {
+    box-shadow: none !important;
+    border: none !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  .card {
+    break-inside: avoid;
+    border: 1px solid #ccc !important;
+    margin-bottom: 0.5rem !important;
+  }
+  .card-body {
+    padding: 0.75rem !important;
+  }
+  .card-header {
+    padding: 0.75rem !important;
+  }
+  .grid {
+    gap: 0.5rem 1rem !important;
+  }
+  .breakdown-info {
+    margin-bottom: 0.75rem !important;
+    padding: 0.5rem !important;
+  }
 }
 @media (max-width: 640px) {
 .page {
