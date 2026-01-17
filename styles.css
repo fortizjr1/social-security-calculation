@@ -73,7 +73,7 @@
     gap: 0.75rem;
   }
   .tab-btn {
-    width: 100%;
+    width: 100% !important;
     text-align: center;
     border: 1px solid #e5e7eb;
     padding: 0.75rem;
@@ -90,19 +90,26 @@
     gap: 1rem;
     padding: 1.25rem;
   }
+  input[type="text"],
+  input[type="number"],
+  input[type="date"],
+  select.form-select {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 100% !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
+  }
 }
 
 /* Form Select Styling */
 .form-select {
   cursor: pointer;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 0.5rem center;
-  background-size: 1.25rem;
-  padding-right: 2.25rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 0.5rem center !important;
+  background-size: 1.25rem !important;
+  padding-right: 2.25rem !important;
 }
 .form-select:focus {
   border-color: #2563eb;
@@ -216,8 +223,13 @@ color: #374151;
 input[type="text"],
 input[type="number"],
 input[type="date"],
-.form-select {
-  width: 100%;
+select.form-select {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
   padding: 0.45rem 0.5rem;
   font-size: 0.95rem;
   border: 1px solid #d1d5db;
