@@ -189,15 +189,69 @@ function calculate() {
   }
 }
 
+function calculateEmployment() {
+  var totalEmploymentOutput = document.getElementById("totalEmploymentIncome");
+  var payFrequencyInput = document.getElementById("payFrequency");
+  
+  if (!totalEmploymentOutput || !payFrequencyInput) return;
+
+  var stubInputs = [
+    document.getElementById("grossPay1"),
+    document.getElementById("grossPay2"),
+    document.getElementById("grossPay3"),
+    document.getElementById("grossPay4")
+  ];
+
+  var totalGross = 0;
+  var stubCount = 0;
+
+  stubInputs.forEach(function(input) {
+    if (input) {
+      var val = parseNumber(input.value);
+      if (val !== null && val > 0) {
+        totalGross += val;
+        stubCount++;
+      }
+    }
+  });
+
+  var frequency = parseInt(payFrequencyInput.value, 10);
+
+  if (stubCount === 0) {
+    totalEmploymentOutput.value = "";
+    return;
+  }
+
+  // Calculate average per stub
+  var averageGross = totalGross / stubCount;
+  
+  // Calculate annual income
+  var totalAnnual = averageGross * frequency;
+  totalEmploymentOutput.value = formatCurrency(totalAnnual);
+}
+
 function resetForm() {
-  var inputs = document.querySelectorAll("input");
+  var inputs = document.querySelectorAll("input, select");
   inputs.forEach(function (input) {
     if (input.type === "button" || input.type === "submit") return;
-    input.value = "";
+    if (input.tagName === "SELECT") {
+      input.selectedIndex = 0;
+    } else {
+      input.value = "";
+    }
   });
   setMessage("");
-  var memberName = document.getElementById("memberName");
-  if (memberName) memberName.focus();
+  
+  // Clear breakdowns
+  var breakdownContainer = document.getElementById("breakdownContainer");
+  if (breakdownContainer) breakdownContainer.innerHTML = "";
+
+  // Focus the name field of the active section
+  var activeSection = document.querySelector(".calculator-section.active");
+  if (activeSection) {
+    var firstInput = activeSection.querySelector("input[type='text']");
+    if (firstInput) firstInput.focus();
+  }
 }
 
 function printPage() {
@@ -205,12 +259,18 @@ function printPage() {
 }
 
 function downloadPDF() {
-  var element = document.querySelector(".page");
-  var memberName = document.getElementById("memberName").value || "Member";
-  var filename = "SSI_Calculation_" + memberName.replace(/\s+/g, "_") + ".pdf";
+  var element = document.querySelector(".calculator-section.active");
+  var activeTab = document.querySelector(".tab-btn.active");
+  var tabName = activeTab ? activeTab.textContent : "Calculator";
+  
+  // Get member name from active section
+  var nameInput = element.querySelector("input[autocomplete='name']");
+  var memberName = (nameInput && nameInput.value) ? nameInput.value : "Member";
+  
+  var filename = tabName.replace(/\s+/g, "_") + "_" + memberName.replace(/\s+/g, "_") + ".pdf";
 
   var opt = {
-    margin: [0.3, 0.3, 0.3, 0.3], // top, left, bottom, right
+    margin: [0.3, 0.3, 0.3, 0.3],
     filename: filename,
     image: { type: 'jpeg', quality: 0.98 },
     html2canvas: { 
@@ -223,13 +283,13 @@ function downloadPDF() {
     pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
   };
 
-  // Temporarily reduce padding for PDF generation
+  // Temporarily adjust styles for PDF generation
   element.style.padding = "0.1in";
+  element.style.background = "white";
   
-  // New Promise-based usage:
   html2pdf().set(opt).from(element).save().then(function() {
-    // Restore padding after generation
     element.style.padding = "";
+    element.style.background = "";
   });
 }
 
@@ -252,8 +312,26 @@ document.addEventListener("DOMContentLoaded", function () {
   if (printButton) printButton.addEventListener("click", printPage);
   if (downloadPdfButton) downloadPdfButton.addEventListener("click", downloadPDF);
 
-  // Inputs that trigger calculation
-  var calcInputs = [
+  // Tab switching logic
+  var tabButtons = document.querySelectorAll(".tab-btn");
+  tabButtons.forEach(function(btn) {
+    btn.addEventListener("click", function() {
+      var targetId = this.getAttribute("data-target");
+      
+      // Update buttons
+      tabButtons.forEach(function(b) { b.classList.remove("active"); });
+      this.classList.add("active");
+      
+      // Update sections
+      var sections = document.querySelectorAll(".calculator-section");
+      sections.forEach(function(s) { s.classList.remove("active"); });
+      var targetSection = document.getElementById(targetId);
+      if (targetSection) targetSection.classList.add("active");
+    });
+  });
+
+  // Social Security Inputs that trigger calculation
+  var ssCalcInputs = [
     "currentMonthlyBenefit",
     "colaPercent",
     "colaCurrentMonthly",
@@ -261,13 +339,31 @@ document.addEventListener("DOMContentLoaded", function () {
     "colaEffectiveDate"
   ];
 
-  calcInputs.forEach(function(id) {
+  ssCalcInputs.forEach(function(id) {
     var el = document.getElementById(id);
     if (el) {
       el.addEventListener("input", calculate);
-      // For dates, change event might be needed in some browsers
       if (el.type === "date") {
         el.addEventListener("change", calculate);
+      }
+    }
+  });
+
+  // Employment Inputs that trigger calculation
+  var empCalcInputs = [
+    "grossPay1", "payDate1",
+    "grossPay2", "payDate2",
+    "grossPay3", "payDate3",
+    "grossPay4", "payDate4",
+    "payFrequency"
+  ];
+  empCalcInputs.forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) {
+      if (el.tagName === "SELECT" || el.type === "date") {
+        el.addEventListener("change", calculateEmployment);
+      } else {
+        el.addEventListener("input", calculateEmployment);
       }
     }
   });
