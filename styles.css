@@ -333,6 +333,9 @@ color: #374151;
 .btn.outline:hover {
 background-color: #f3f4f6;
 }
+.btn i {
+  margin-right: 0.5rem;
+}
 .actions {
 display: flex;
 gap: 1rem;
