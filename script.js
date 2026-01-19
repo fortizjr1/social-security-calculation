@@ -211,6 +211,14 @@ function calculate() {
   }
 }
 
+function formatDateMMDDYYYY(date) {
+  if (!date) return "";
+  var m = (date.getMonth() + 1).toString().padStart(2, '0');
+  var d = date.getDate().toString().padStart(2, '0');
+  var y = date.getFullYear();
+  return m + "/" + d + "/" + y;
+}
+
 function calculateEmployment() {
   var totalEmploymentOutput = document.getElementById("totalEmploymentIncome");
   var avgGrossOutput = document.getElementById("avgGrossPay");
@@ -247,6 +255,7 @@ function calculateEmployment() {
   var stubCount = 0;
   var hasOutdatedDate = false;
   var effectiveDate = parseDate(effectiveDateInput ? effectiveDateInput.value : "");
+  var validStubs = [];
 
   stubInputs.forEach(function(input, index) {
     if (input) {
@@ -258,16 +267,23 @@ function calculateEmployment() {
         totalGross += val;
         stubCount++;
         
+        var stubDate = null;
+        if (dateInputs[index] && dateInputs[index].value) {
+          stubDate = parseDate(dateInputs[index].value);
+        }
+
+        validStubs.push({
+          amount: val,
+          date: stubDate
+        });
+        
         // Date validation logic
-        if (effectiveDate && dateInputs[index] && dateInputs[index].value) {
-          var stubDate = parseDate(dateInputs[index].value);
-          if (stubDate) {
-            var diffTime = effectiveDate.getTime() - stubDate.getTime();
-            var diffDays = diffTime / (1000 * 3600 * 24);
-            if (diffDays > 120 || diffDays < 0) {
-              hasOutdatedDate = true;
-              dateInputs[index].classList.add("invalid-date");
-            }
+        if (effectiveDate && stubDate) {
+          var diffTime = effectiveDate.getTime() - stubDate.getTime();
+          var diffDays = diffTime / (1000 * 3600 * 24);
+          if (diffDays > 120 || diffDays < 0) {
+            hasOutdatedDate = true;
+            dateInputs[index].classList.add("invalid-date");
           }
         }
       }
@@ -308,18 +324,32 @@ function calculateEmployment() {
   // Show breakdown
   if (empBreakdownContainer) {
     var frequencyText = payFrequencyInput.options[payFrequencyInput.selectedIndex].text.split(" ")[0];
+    var stubsHtml = validStubs.map(function(stub, idx) {
+      var dateStr = stub.date ? ` (${formatDateMMDDYYYY(stub.date)})` : "";
+      return `
+        <div class="breakdown-item">
+          <span>Stub ${idx + 1} Amount${dateStr}:</span>
+          <span>$${formatCurrency(stub.amount)}</span>
+        </div>
+      `;
+    }).join("");
+
     empBreakdownContainer.innerHTML = `
-      <div class="breakdown-item">
-        <span>Average Gross Pay:</span>
-        <span>$${formatCurrency(averageGross)}</span>
-      </div>
-      <div class="breakdown-item">
-        <span>Pay Frequency:</span>
-        <span>${frequency} (${frequencyText})</span>
-      </div>
-      <div class="breakdown-item">
-        <span>Calculation:</span>
-        <span>$${formatCurrency(averageGross)} × ${frequency} = $${formatCurrency(totalAnnual)}</span>
+      <div style="font-weight: 600; color: #1e293b; margin-bottom: 0.75rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 0.25rem;">Pay Stub Breakdown</div>
+      ${stubsHtml}
+      <div style="margin-top: 0.5rem; border-top: 1px solid #e2e8f0; padding-top: 0.5rem;">
+        <div class="breakdown-item">
+          <span>Average Gross Pay:</span>
+          <span>$${formatCurrency(averageGross)}</span>
+        </div>
+        <div class="breakdown-item">
+          <span>Pay Frequency:</span>
+          <span>${frequency} (${frequencyText})</span>
+        </div>
+        <div class="breakdown-item">
+          <span>Calculation:</span>
+          <span>$${formatCurrency(averageGross)} × ${frequency} = $${formatCurrency(totalAnnual)}</span>
+        </div>
       </div>
     `;
     // Ensure the container is visible
