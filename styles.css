@@ -273,6 +273,7 @@ input[readonly] {
   font-size: 0.95rem;
   color: #334155;
   display: block;
+  font-weight: 600; /* All text in breakdown bold */
 }
 
 .breakdown-info:empty {
